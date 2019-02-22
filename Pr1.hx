@@ -3,12 +3,12 @@ module org.crsx.hacs.samples.Pr1 {
 
 /* LEXICAL ANALYSIS. */
 
-space [ \t\n\r] | "//" .* | "/*" "*/";          // white space convention
+space [ \t\n\r] | "//" .* | "/*" ⟨Unquote⟩ "*/";          // white space convention
 
 token INT     | ⟨Digit⟩+ ;                       // tokens
 token FLOAT   | ⟨INT⟩ "." ⟨INT⟩ ;
 token SPECIAL | ⟨Slash⟩ (⟨COctet⟩ | ⟨CHexdec⟩);
-token STRING  | ⟨Quote⟩ (⟨Letter⟩+ ⟨Digit⟩* | ⟨SPECIAL⟩) ⟨Quote⟩;
+token STRING  | ⟨Quote⟩ ⟨Unquote⟩ ⟨Quote⟩;
 token ID      | ⟨Lower⟩+ ('_'? ⟨INT⟩)? ;
 
 token fragment Digit        | [0-9] ;
@@ -16,6 +16,7 @@ token fragment Lower        | [a-z] ;
 token fragment Upper        | [A-Z];
 token fragment Letter       | ⟨Lower⟩ | ⟨Upper⟩ | [\$_];
 token fragment Quote        | \" ;
+token fragment Unquote      | ⟨Letter⟩+ ⟨Digit⟩* | ⟨SPECIAL⟩;
 token fragment Slash        | \\;
 token fragment Controlchar  | [nt\\\"];
 
