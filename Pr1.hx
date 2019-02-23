@@ -3,17 +3,20 @@ module org.crsx.hacs.samples.Pr1 {
 
 /* LEXICAL ANALYSIS. */
 
-space [ \t\n] ;                                 // white space convention
+space [ \t\n\r] | "//" .* | "/*" ⟨Unquote⟩ "*/";          // white space convention
 
 token INT     | ⟨Digit⟩+ ;                       // tokens
 token FLOAT   | ⟨INT⟩ "." ⟨INT⟩ ;
-token SPECIAL | ⟨Slash⟩ (⟨COctet⟩ | ⟨CHex⟩);
-token STRING  | ⟨Quote⟩ (⟨Lower⟩+ | ⟨SPECIAL⟩) ⟨Quote⟩;
+token SPECIAL | ⟨Slash⟩ (⟨COctet⟩ | ⟨CHexdec⟩);
+token STRING  | ⟨Quote⟩ ⟨Unquote⟩ ⟨Quote⟩;
 token ID      | ⟨Lower⟩+ ('_'? ⟨INT⟩)? ;
 
 token fragment Digit        | [0-9] ;
 token fragment Lower        | [a-z] ;
+token fragment Upper        | [A-Z];
+token fragment Letter       | ⟨Lower⟩ | ⟨Upper⟩ | [\$_];
 token fragment Quote        | \" ;
+token fragment Unquote      | ⟨Letter⟩+ ⟨Digit⟩* | ⟨SPECIAL⟩;
 token fragment Slash        | \\;
 token fragment Controlchar  | [nt\\\"];
 
@@ -23,12 +26,15 @@ token fragment COctet       | ⟨Octet⟩
                             | ⟨Octet⟩⟨Octet⟩⟨Octet⟩;
 
 token fragment Hexdecimal   | [0-9a-fA-F];
-token fragment CHex         | [xX] ⟨Hexdecimal⟩⟨Hexdecimal⟩;
+token fragment CHexdec      | [xX] ⟨Hexdecimal⟩⟨Hexdecimal⟩;
 
 /* SYNTAX ANALYSIS. */
 
 sort Exp   | ⟦ ⟨Exp@1⟩ + ⟨Exp@2⟩ ⟧@1            // addition
+           | ⟦ ⟨Exp@1⟩ - ⟨Exp@2⟩ ⟧@1            // addition
            | ⟦ ⟨Exp@2⟩ * ⟨Exp@3⟩ ⟧@2            // multiplication
+           | ⟦ ⟨Exp@2⟩ / ⟨Exp@3⟩ ⟧@2            // addition
+           | ⟦ ⟨Exp@2⟩ % ⟨Exp@3⟩ ⟧@2            // addition
            | ⟦ ⟨INT⟩ ⟧@3                        // integer
            | ⟦ ⟨FLOAT⟩ ⟧@3                      // floating point number
            | ⟦ ⟨Name⟩ ⟧@3                       // assigned value
