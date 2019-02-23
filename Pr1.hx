@@ -31,7 +31,10 @@ token fragment CHexdec      | [xX] ⟨Hexdecimal⟩⟨Hexdecimal⟩;
 /* SYNTAX ANALYSIS. */
 
 sort Exp   | ⟦ ⟨Exp@1⟩ + ⟨Exp@2⟩ ⟧@1            // addition
+           | ⟦ ⟨Exp@1⟩ - ⟨Exp@2⟩ ⟧@1            // addition
            | ⟦ ⟨Exp@2⟩ * ⟨Exp@3⟩ ⟧@2            // multiplication
+           | ⟦ ⟨Exp@2⟩ / ⟨Exp@3⟩ ⟧@2            // addition
+           | ⟦ ⟨Exp@2⟩ % ⟨Exp@3⟩ ⟧@2            // addition
            | ⟦ ⟨INT⟩ ⟧@3                        // integer
            | ⟦ ⟨FLOAT⟩ ⟧@3                      // floating point number
            | ⟦ ⟨Name⟩ ⟧@3                       // assigned value
