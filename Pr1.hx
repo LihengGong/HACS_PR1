@@ -3,7 +3,9 @@ module org.crsx.hacs.samples.Pr1 {
 
 /* LEXICAL ANALYSIS. */
 
-space [ \t\n\r] | "//" .* | "/*" ⟨Unquote⟩ "*/";          // white space convention
+space [ \t\n\r] | "//" .* 
+                | "/" ⟨Aster⟩ ("/" | ⟨Other⟩ | ⟨Aster⟩+ ⟨Other⟩)* ⟨Aster⟩+ "/"; 
+                // white space convention and comments
 
 token INT     | ⟨Digit⟩+ ;                       // tokens
 token FLOAT   | ⟨INT⟩ "." ⟨INT⟩ ;
@@ -20,6 +22,8 @@ token fragment Unquote      | ⟨Letter⟩+ ⟨Digit⟩* | ⟨SPECIAL⟩;
 token fragment Slash        | \\;
 token fragment Controlchar  | [nt\\\"];
 
+token fragment Aster        | [*];
+token fragment Other        | [^/*]; /* all other chars other than slash and star */
 token fragment Octet        | [0-7];
 token fragment COctet       | ⟨Octet⟩
                             | ⟨Octet⟩⟨Octet⟩
@@ -30,15 +34,27 @@ token fragment CHexdec      | [xX] ⟨Hexdecimal⟩⟨Hexdecimal⟩;
 
 /* SYNTAX ANALYSIS. */
 
-sort Exp   | ⟦ ⟨Exp@1⟩ + ⟨Exp@2⟩ ⟧@1            // addition
-           | ⟦ ⟨Exp@1⟩ - ⟨Exp@2⟩ ⟧@1            // addition
-           | ⟦ ⟨Exp@2⟩ * ⟨Exp@3⟩ ⟧@2            // multiplication
-           | ⟦ ⟨Exp@2⟩ / ⟨Exp@3⟩ ⟧@2            // addition
-           | ⟦ ⟨Exp@2⟩ % ⟨Exp@3⟩ ⟧@2            // addition
-           | ⟦ ⟨INT⟩ ⟧@3                        // integer
-           | ⟦ ⟨FLOAT⟩ ⟧@3                      // floating point number
-           | ⟦ ⟨Name⟩ ⟧@3                       // assigned value
-           | sugar ⟦ (⟨Exp#⟩) ⟧@3 → Exp#        // parenthesis
+sort Exp   | ⟦ ⟨Exp@1⟩ || ⟨Exp@2⟩ ⟧@1            // logical or
+           | ⟦ ⟨Exp@2⟩ && ⟨Exp@3⟩ ⟧@2            // logical and
+           | ⟦ ⟨Exp@3⟩ != ⟨Exp@4⟩ ⟧@3            // not equal
+           | ⟦ ⟨Exp@3⟩ == ⟨Exp@4⟩ ⟧@3            // equal
+           | ⟦ ⟨Exp@4⟩ >= ⟨Exp@5⟩ ⟧@4            // greater or equal
+           | ⟦ ⟨Exp@4⟩ <= ⟨Exp@5⟩ ⟧@4            // less or equal
+           | ⟦ ⟨Exp@4⟩ > ⟨Exp@5⟩ ⟧@4            // greater
+           | ⟦ ⟨Exp@4⟩ < ⟨Exp@5⟩ ⟧@4            // less
+           | ⟦ ⟨Exp@5⟩ + ⟨Exp@6⟩ ⟧@5            // addition
+           | ⟦ ⟨Exp@5⟩ - ⟨Exp@6⟩ ⟧@5            // subtraction
+           | ⟦ ⟨Exp@6⟩ * ⟨Exp@7⟩ ⟧@6            // multiplication
+           | ⟦ ⟨Exp@6⟩ / ⟨Exp@7⟩ ⟧@6            // addition
+           | ⟦ ⟨Exp@6⟩ % ⟨Exp@7⟩ ⟧@6            // addition
+           | ⟦ +⟨Exp@8⟩⟧@7                     // positive
+           | ⟦ -⟨Exp@8⟩⟧@7                      // negative
+           | ⟦ *⟨Exp@8⟩⟧@7                     // pointer
+           | ⟦ &⟨Exp@8⟩⟧@7                     // address
+           | ⟦ ⟨INT⟩ ⟧@8                        // integer
+           | ⟦ ⟨FLOAT⟩ ⟧@8                      // floating point number
+           | ⟦ ⟨Name⟩ ⟧@8                       // assigned value
+           | sugar ⟦ (⟨Exp#⟩) ⟧@8 → Exp#        // parenthesis
            ;
 
 sort Name  | symbol ⟦ ⟨ID⟩ ⟧ ;                  // assigned symbols
